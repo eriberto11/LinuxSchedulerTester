@@ -18,4 +18,4 @@ SchedulerTester: workerProg.c schedTest.c
 
 
 clean:
-	rm ScheduleTester
+	rm SchedulerTester

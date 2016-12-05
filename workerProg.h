@@ -8,7 +8,9 @@ int workload;
 long ClockCycles;
 long latency;
 long workClocker;
-};
+} stuff;
+
+
 
 void* doWork(void *workStruct)  ;
 int runIt(int q);

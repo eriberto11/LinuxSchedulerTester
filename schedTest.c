@@ -34,7 +34,8 @@ int main ( int argc , char *argv[] ) {
 	//sched_setscheduler(0,0,param);
 	int i = sched_getscheduler(0);
 	printf("Current scheduler is %d\n"	,i);	
+	struct stuff *blo = malloc(sizeof(struct stuff));
 	void* p;
-	doWork(p);
+	doWork(blo);
     return 0;
 }
