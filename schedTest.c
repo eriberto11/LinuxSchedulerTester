@@ -17,9 +17,8 @@ void *dummyfunc(void *empty){
 	printf("scheduler set ? !");
     return empty;
 }
+
 int main ( int argc , char *argv[] ) {
-	//pthread_t pt ;
-	//int t=pthread_create(&pt,NULL,&dummyfunc,NULL);
 	//http://man7.org/linux/man-pages/man2/sched_setscheduler.2.html
 	// int sched_setscheduler(pid_t pid, int policy,
     //                          const struct sched_param *param);
@@ -37,5 +36,15 @@ int main ( int argc , char *argv[] ) {
 	struct stuff *blo = malloc(sizeof(struct stuff));
 	void* p;
 	doWork(blo);
+	printf("\nafter doWork\n");
+	pthread_t pt ;
+
+	int t=pthread_create(&pt,NULL,&doWork,blo);
+	if(t) {
+		fprintf(stdout, "Something bad from pthread \n" );
+	}else {
+		fprintf(stdout, "Something good from pthread \n" );
+	}
+	pthread_join(pt,NULL);
     return 0;
 }

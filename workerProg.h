@@ -8,6 +8,7 @@ int workload;
 long ClockCycles;
 long latency;
 long workClocker;
+int scheduler;
 } stuff;
 
 
