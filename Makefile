@@ -12,7 +12,7 @@ TFLAGS=-std=c11 -Wall
 
 all:SchedulerTester
 
-SchedulerTester: workerProg.c schedTest.c	
+SchedulerTester: workerProg.c schedTest.c workerProg.h
 	$(CC) $(TFLAGS) -g schedTest.c  workerProg.h workerProg.c -lpthread  -o SchedulerTester
 
 

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdio.h>
 #include <time.h>
+#include <pthread.h>
 #include <stdbool.h>
 
 struct stuff
@@ -14,12 +15,12 @@ int scheduler;
 
 struct evaluatorStat {
 long clock ;   // Keeps time from first operation to last after running the testpointer.
-void *funcPtr; // Points to the test that is actually being run.
+int (*funcPtr)(); // Points to the test that is actually being run.
 int NrOfWork; // should be variable, can't only try one work size.
 long CPUCycles; // If we can actually count how many cpuCycles program uses, lets write it to this.
 bool testComplete; // Could the test actually be run/completed ? Best to make sure.
+pthread_mutex_t *lock;
 } evaluator;
-
-
+typedef struct evaluatorStat evStruct;
 void* doWork(void *workStruct)  ;
 int runIt(int q);

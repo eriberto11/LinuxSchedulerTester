@@ -28,6 +28,7 @@ void* doWork(void *workStruct) {
 	return workStruct;
 }
 
+
 int runIt(int q) { 
 	int z=0;	
 	for(int i =0;i<q;i++) {
