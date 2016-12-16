@@ -34,14 +34,14 @@ int synchFuncer(struct evaluatorStat *gg){
 	/*for (int i = 0; i < gg->NrOfWork; ++i)
 	{*/
 		int calc=doSomeMath(55);
-		pthread_mutex_lock(mlock);
+		//pthread_mutex_lock(&gg->lock);
 		globalCntr=globalCntr+1;
-		pthread_mutex_unlock(mlock);
+	//	pthread_mutex_unlock(&gg->lock);
 		allUpdates++;
 
 		/* code */
 	//}
-		gg->stop=clock();
+	//	gg->stop=clock();
 }
 void printdiff(struct evaluatorStat *gg) {
 	printf("time taken for thread %d : %d\n",gg->id, gg->stop-gg->start );
@@ -143,16 +143,18 @@ int main ( int argc , char *argv[] ) {
 	pthread_t threadpool[noOfTimes];
 	for(int i=0;i<noOfTimes;i++){
 
-
+		fprintf(stdout, " starting function w threads\n" );
 		ct[i]->start=clock();
 		if(pthread_create(&threadpool[i],NULL,ct[i]->funcPtr,ct[i])<0)
 			fprintf(stderr, "Thread create error\n" );	
 	}
 	for(int i=0;i<noOfTimes;i++){
+		fprintf(stdout, " joining function w threads\n" );
+		
 		if(pthread_join(&threadpool[i],NULL)<0)
 			fprintf(stderr, "Thread join error\n" );
 	}
-	for(int i=0;i<noOfTimes;i++){
+	for(int i=0;i<noOfTimes;i++) {
 		printdiff(ct[i]);
 	}
 	calculateAvg(ct,noOfTimes);
