@@ -23,25 +23,30 @@ int doSomeMath(int inVal){
 	return 1;
 }
 
+int floatOperations(struct  evaluatorStat *gg){
+	for(int i = 0; i<gg->NrOfWork ; i++){
+		
+	}
+}
+
 int dummyfunc(void *empty) {
     empty=malloc(1);
 	printf("scheduler set ? !\n");
     return empty;
 }
-int synchFuncer(struct evaluatorStat *gg){
-	pthread_mutex_t *mlock=gg->lock;
-	//try(pt)
-	/*for (int i = 0; i < gg->NrOfWork; ++i)
-	{*/
+int synchFuncer(struct evaluatorStat *gg) {
+	for (int i = 0; i < gg->NrOfWork; ++i)
+	{
 		int calc=doSomeMath(55);
-		//pthread_mutex_lock(&gg->lock);
+		pthread_mutex_lock(gg->lock);
 		globalCntr=globalCntr+1;
-	//	pthread_mutex_unlock(&gg->lock);
+		//doSomeMath(globalCntr);
+		pthread_mutex_unlock(gg->lock);
 		allUpdates++;
 
 		/* code */
-	//}
-	//	gg->stop=clock();
+	}
+	gg->stop=clock();
 }
 void printdiff(struct evaluatorStat *gg) {
 	printf("time taken for thread %d : %d\n",gg->id, gg->stop-gg->start );
@@ -58,7 +63,7 @@ void calculateAvg(struct evaluatorStat *gg[],int length){
 int main ( int argc , char *argv[] ) {
 	// To gather options of program. 
 	int op=0;
-	globalCntr=0;
+	globalCntr=0; 	
 	allUpdates=0;
 	char *testtype="synch";
 	ttype t = SYNCH;
@@ -119,6 +124,7 @@ int main ( int argc , char *argv[] ) {
 		ct[i]->clock=20;
 		ct[i]->NrOfWork=noOfTimes;
 		ct[i]->lock = &newLock;
+		ct[i]->funcPtr=&synchFuncer;
 		switch(t) {
 			case SYNCH:
 			ct[i]->funcPtr=&synchFuncer;
@@ -139,57 +145,25 @@ int main ( int argc , char *argv[] ) {
 		}
 	}
 
-
-	pthread_t threadpool[noOfTimes];
-	for(int i=0;i<noOfTimes;i++){
-
-		fprintf(stdout, " starting function w threads\n" );
-		ct[i]->start=clock();
-		if(pthread_create(&threadpool[i],NULL,ct[i]->funcPtr,ct[i])<0)
-			fprintf(stderr, "Thread create error\n" );	
+	pthread_t theThreads[noOfTimes];
+	for (int i = 0; i < noOfTimes; ++i)
+	{
+		int q=	pthread_create(&theThreads[i],NULL,&synchFuncer,ct[i]);
+		printf("pthread created %d\n",q );
 	}
-	for(int i=0;i<noOfTimes;i++){
-		fprintf(stdout, " joining function w threads\n" );
-		
-		if(pthread_join(&threadpool[i],NULL)<0)
-			fprintf(stderr, "Thread join error\n" );
+
+	for (int i = 0; i < noOfTimes; ++i)
+	{
+		int q = pthread_join(theThreads[i],NULL);
+		fprintf(stdout, "pthread joined %d\n",q );
 	}
+
+
 	for(int i=0;i<noOfTimes;i++) {
 		printdiff(ct[i]);
 	}
 	calculateAvg(ct,noOfTimes);
 	fprintf(stdout, "nr of updates for globalCntr: %d, and globalCntr itself: %d\n",allUpdates,globalCntr );
-	//http://man7.org/linux/man-pages/man2/sched_setscheduler.2.html
-	// int sched_setscheduler(pid_t pid, int policy,
-    //                          const struct sched_param *param);
-	//Om arg 1 == 0 så sätts sched för nuvarnade tråd.
-	/*struct sched_param *param = malloc(sizeof(struct sched_param));
-//	param->sched_priority=2;	
-//	sched_setscheduler(0,SCHED_BATCH,param);
-//	sched_setscheduler(0,SCHED_IDLE,param);
-//	sched_setscheduler(0,SCHED_OTHER,param);
-//	sched_setscheduler(0,SCHED_FIFO,param);
-//	sched_setscheduler(0,SCHED_RR,param);
-	sched_setscheduler(0,0,param);
-	int i = sched_getscheduler(0);
-	printf("Current scheduler is %d\n"	,i);	
-	struct stuff *blo = malloc(sizeof(struct stuff));
-	struct evaluatorStat *evla= malloc(sizeof(struct evaluatorStat));
-	evla->clock= 10;
-	evla->funcPtr=&runIt;
-	fprintf(stdout, "clock = %d\n",evla->clock );
-	void* p;
-	doWork(blo);
-	printf("\nafter doWork\n");
-	pthread_t pt ;
-	evla->funcPtr();
 
-	int qt=pthread_create(&pt,NULL,&doWork,blo);
-	if(t) {
-		fprintf(stdout, "Something bad from pthread \n" );
-	}else {
-		fprintf(stdout, "Something good from pthread \n" );
-	}
-	pthread_join(pt,NULL);*/
     return 0;
 }
