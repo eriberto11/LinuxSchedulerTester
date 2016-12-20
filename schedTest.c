@@ -5,7 +5,7 @@
 #include <getopt.h>
 #include <math.h>
 #include "workerProg.h"
-
+#include <errno.h>
 /*struct sched_param {
    //            ...
                int sched_priority;
@@ -15,7 +15,11 @@
 //void *dummyfunc(void *empty);
 long globalCntr;
 long allUpdates;
+
 typedef enum {SYNCH,LOAD,FLOATOPS,EMPTYLOOP} ttype;
+
+typedef enum {SCHEDFIFO,SCHEDRR } schedulerType;
+
 int doSomeMath(int inVal){
 	double d = atan2((double) inVal,0.1);
 	d=log(d);
@@ -24,10 +28,15 @@ int doSomeMath(int inVal){
 }
 
 int floatOperations(struct  evaluatorStat *gg){
+	float f1 = .4444;
+	float f2 = .621678;
 	for(int i = 0; i<gg->NrOfWork ; i++){
-		
+		f1=f1*f2;
 	}
+	gg->stop=clock();
 }
+
+
 
 int dummyfunc(void *empty) {
     empty=malloc(1);
@@ -67,8 +76,13 @@ int main ( int argc , char *argv[] ) {
 	allUpdates=0;
 	char *testtype="synch";
 	ttype t = SYNCH;
+	schedulerType sched = SCHED_FIFO;
 	int noOfTimes=100;
-	while((op =	getopt(argc,argv,"n:slfe")) != -1) {
+
+	struct sched_param *sp = malloc(sizeof(struct sched_param));
+	sp->sched_priority=99;
+	const struct sched_param *ss= sp;
+	while((op =	getopt(argc,argv,"S:n:slfe")) != -1) {
 		switch(op) {
 		/*	case 't':
 				printf("t %s\n", optarg);
@@ -90,11 +104,20 @@ int main ( int argc , char *argv[] ) {
 			case 'e':
 				t=EMPTYLOOP;
 				break;
+			case 'S':
+				sched = SCHED_RR;
+				int sSet=sched_setscheduler(0,SCHED_FIFO,  ss);
+				printf("Set Scheduler %d\n",sSet);
+				if(sSet<0)
+		//			printf("probs %s\n", strerror(errno));
+					;
+				break;
 			default:
 				printf("DEFAULT %s\n", optarg);
 				break;
 		}
 	}
+
 	int results[noOfTimes] ;
 	pthread_mutex_t newLock ;
 	if(pthread_mutex_init(&newLock,NULL)<0) {
@@ -135,7 +158,7 @@ int main ( int argc , char *argv[] ) {
 		//	printf("LOAD %d",i);
 			break;
 			case FLOATOPS:
-			ct[i]->funcPtr=&synchFuncer;
+			ct[i]->funcPtr=&floatOperations;
 		//	printf("FLÖPAT %d",i);
 			break;
 			case EMPTYLOOP:
@@ -148,14 +171,14 @@ int main ( int argc , char *argv[] ) {
 	pthread_t theThreads[noOfTimes];
 	for (int i = 0; i < noOfTimes; ++i)
 	{
-		int q=	pthread_create(&theThreads[i],NULL,&synchFuncer,ct[i]);
-		printf("pthread created %d\n",q );
+		int q=	pthread_create(&theThreads[i],NULL,ct[i]->funcPtr,ct[i]);
+	//	printf("pthread created %d\n",q );
 	}
 
 	for (int i = 0; i < noOfTimes; ++i)
 	{
 		int q = pthread_join(theThreads[i],NULL);
-		fprintf(stdout, "pthread joined %d\n",q );
+	//	fprintf(stdout, "pthread joined %d\n",q );
 	}
 
 
