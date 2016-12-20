@@ -129,21 +129,7 @@ int main ( int argc , char *argv[] ) {
 	}
 
 	for(int i=0;i<noOfTimes;i++) {
-/*		switch(t) {
-			case SYNCH:
-			printf("SYNCH %d",i);
-			break;
-			case LOAD:
-			printf("LOAD %d",i);
-			break;
-			case FLOATOPS:
-			printf("FLÖPAT %d",i);
-			break;
-			case EMPTYLOOP:
-			printf("EMPTYLOOP %d",i);
-			break;
-		}
-*/		ct[i]->id=i;
+		ct[i]->id=i;
 		ct[i]->clock=20;
 		ct[i]->NrOfWork=noOfTimes;
 		ct[i]->lock = &newLock;
@@ -151,19 +137,15 @@ int main ( int argc , char *argv[] ) {
 		switch(t) {
 			case SYNCH:
 			ct[i]->funcPtr=&synchFuncer;
-		//	printf("SYNCH %d",i);
 			break;
 			case LOAD:
 			ct[i]->funcPtr=&synchFuncer;
-		//	printf("LOAD %d",i);
 			break;
 			case FLOATOPS:
 			ct[i]->funcPtr=&floatOperations;
-		//	printf("FLÖPAT %d",i);
 			break;
 			case EMPTYLOOP:
 			ct[i]->funcPtr=&synchFuncer;
-		//	printf("EMPTYLOOP %d",i);
 			break;
 		}
 	}
@@ -171,8 +153,11 @@ int main ( int argc , char *argv[] ) {
 	pthread_t theThreads[noOfTimes];
 	for (int i = 0; i < noOfTimes; ++i)
 	{
+		ct[i]->start=clock();
 		int q=	pthread_create(&theThreads[i],NULL,ct[i]->funcPtr,ct[i]);
-	//	printf("pthread created %d\n",q );
+
+		int bu=		sched_setscheduler(q,SCHED_FIFO,ss);
+		printf("pthread created %d sched %d\n",q, bu );
 	}
 
 	for (int i = 0; i < noOfTimes; ++i)
